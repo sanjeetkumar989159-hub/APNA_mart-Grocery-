@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Apna Mart | Grocery Delivery App</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="toastContainer" class="toast-container"></div>
+
+  <header class="app-header">
+    <div class="header-left">
+      <button class="icon-btn menu-btn" id="menuBtn" aria-label="Open menu">☰</button>
+      <div class="brand" id="brandHome">
+        <div class="brand-logo">🛒</div>
+        <div>
+          <h1>Apna Mart</h1>
+          <p>Fresh groceries, fast delivery</p>
+        </div>
+      </div>
+    </div>
+
+    <button class="location-pill" id="detectLocationBtn" title="Demo browser location">
+      <span>📍</span><span id="locationText">Set location</span>
+    </button>
+
+    <nav class="header-actions">
+      <button class="nav-btn" id="ordersBtn">📦 Orders</button>
+      <button class="nav-btn" id="wishlistBtn">❤️ Wishlist <span id="wishlistCount" class="mini-badge">0</span></button>
+      <button class="nav-btn" id="notifyBtn">🔔 <span id="notificationCount" class="mini-badge">0</span></button>
+      <button class="nav-btn" id="themeBtn">🌙</button>
+      <button class="nav-btn user-btn" id="userBtn">Login</button>
+      <span class="username-chip hidden" id="usernameDisplay">👋 Guest</span>
+      <button class="cart-button" id="openCartBtn">🛍️ Cart <span id="cartCount">0</span></button>
+    </nav>
+  </header>
+
+  <aside class="mobile-panel" id="mobilePanel">
+    <button class="close-btn" id="closeMobilePanel">×</button>
+    <h3>Menu</h3>
+    <button data-panel-action="orders">📦 Orders</button>
+    <button data-panel-action="wishlist">❤️ Wishlist</button>
+    <button data-panel-action="notifications">🔔 Notifications</button>
+    <button data-panel-action="cart">🛍️ Cart</button>
+  </aside>
+
+  <main>
+    <section class="hero-section">
+      <div class="hero-slider" id="heroSlider">
+        <div class="hero-content">
+          <span class="eyebrow">Superfast delivery demo</span>
+          <h2 id="heroTitle">Fresh groceries delivered in minutes</h2>
+          <p id="heroSubtitle">Use FIRST50, SAVE100, WELCOME20 or FREESHIP in your cart.</p>
+          <div class="hero-actions">
+            <button class="primary-btn" id="shopNowBtn">Shop now</button>
+            <button class="secondary-btn" id="spinOpenBtn">Spin & Win</button>
+          </div>
+        </div>
+        <div class="hero-visual" id="heroVisual">🥦</div>
+      </div>
+      <div class="hero-dots" id="heroDots"></div>
+    </section>
+
+    <section class="quick-stats">
+      <div><strong>40+</strong><span>Real-image products</span></div>
+      <div><strong>12 min</strong><span>Demo delivery</span></div>
+      <div><strong>₹499</strong><span>Free delivery goal</span></div>
+      <div><strong>Apna Coins</strong><span>Loyalty rewards</span></div>
+    </section>
+
+    <section class="spin-promo" id="spinPromo">
+      <div>
+        <h3>🎰 Lucky Spin Live</h3>
+        <p>Spin once daily and win instant coupons.</p>
+      </div>
+      <button class="glow-btn">Try luck</button>
+    </section>
+
+    <section class="flash-section">
+      <div>
+        <span class="eyebrow">Flash Sale</span>
+        <h2>Today’s fresh deals</h2>
+      </div>
+      <div class="timer" id="flashTimer">00:00:00</div>
+    </section>
+
+    <section class="quick-kits-section">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">Smart picks</span>
+          <h2>Quick Kits</h2>
+        </div>
+      </div>
+      <div class="kits-grid">
+        <button class="kit-card" data-kit="breakfast"><span>🍳</span><strong>Breakfast Kit</strong><small>Milk, bread, butter, banana</small></button>
+        <button class="kit-card" data-kit="chai"><span>☕</span><strong>Chai Kit</strong><small>Tea, milk, sugar, biscuits</small></button>
+        <button class="kit-card" data-kit="party"><span>🎉</span><strong>Party Kit</strong><small>Chips, cola, juice, cookies</small></button>
+        <button class="kit-card" data-kit="cleaning"><span>🧼</span><strong>Cleaning Kit</strong><small>Detergent, cleaner, soap</small></button>
+      </div>
+    </section>
+
+    <section class="assistant-section">
+      <div>
+        <span class="eyebrow">AI style helper</span>
+        <h2>Apna Assistant</h2>
+        <p>Type needs like “breakfast under 500” or “cleaning items”. It suggests matching products locally.</p>
+      </div>
+      <div class="assistant-box">
+        <input id="assistantInput" placeholder="Example: breakfast under 500" />
+        <button id="assistantBtn">Suggest</button>
+      </div>
+      <div id="assistantResults" class="assistant-results"></div>
+    </section>
+
+    <section class="controls-section" id="productsSection">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">Explore</span>
+          <h2>Featured groceries</h2>
+        </div>
+      </div>
+      <div class="controls-grid">
+        <div class="search-wrap">
+          <input id="searchInput" type="search" placeholder="Search products like milk, apple, chips..." />
+          <div id="searchSuggestions" class="suggestions"></div>
+        </div>
+        <select id="categoryFilter" aria-label="Filter by category"></select>
+        <select id="sortFilter" aria-label="Sort products">
+          <option value="default">Sort: Featured first</option>
+          <option value="priceLow">Price: Low to High</option>
+          <option value="priceHigh">Price: High to Low</option>
+          <option value="ratingHigh">Rating: High to Low</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="recommend-section" id="recommendSection">
+      <div class="section-heading compact"><h2>Recommended for you</h2><button class="text-btn" id="buyAgainBtn">Buy Again</button></div>
+      <div class="mini-product-row" id="recommendations"></div>
+    </section>
+
+    <section class="product-grid" id="productGrid"></section>
+    <section class="empty-state hidden" id="noProducts">🥕<h3>No products found</h3><p>Try another search or category.</p></section>
+
+    <section class="dashboard-section" id="dashboardSection">
+      <div class="section-heading"><div><span class="eyebrow">Insights</span><h2>Spending dashboard</h2></div></div>
+      <div class="dashboard-grid" id="dashboardGrid"></div>
+    </section>
+
+    <section class="tracking-section hidden" id="trackingSection">
+      <div class="section-heading"><div><span class="eyebrow">Live demo tracking</span><h2>Track your order</h2></div></div>
+      <div class="tracking-layout">
+        <div class="map-card">
+          <div class="demo-map real-map-wrap" id="demoMap">
+            <div id="realMap" class="real-map"></div>
+            <div class="map-status-card" id="mapStatusCard">📍 Click “Use my location” for live map tracking</div>
+            <button class="map-action-btn" id="mapLocateBtn" type="button">Use my location</button>
+            <div class="map-marker rider-marker hidden" id="riderMarker">🏍️<span>Partner</span></div>
+          </div>
+        </div>
+        <div class="tracking-card">
+          <h3 id="trackingOrderId">Order</h3>
+          <div id="partnerCard"></div>
+          <div class="timeline" id="statusTimeline"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <aside class="cart-drawer" id="cartDrawer">
+    <div class="drawer-header">
+      <h2>Your Cart</h2>
+      <button class="close-btn" id="closeCartBtn">×</button>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="smart-cart" id="smartCart"></div>
+    <div class="coupon-box">
+      <input id="couponInput" placeholder="Apply coupon" />
+      <button id="applyCouponBtn">Apply</button>
+    </div>
+    <div class="cart-summary">
+      <div><span>Subtotal</span><strong id="subtotalValue">₹0</strong></div>
+      <div><span>Delivery</span><strong id="deliveryValue">₹0</strong></div>
+      <div><span>Discount</span><strong id="discountValue">-₹0</strong></div>
+      <div class="total-row"><span>Total</span><strong id="finalTotalValue">₹0</strong></div>
+    </div>
+    <button class="primary-btn full" id="checkoutOpenBtn">Checkout</button>
+    <button class="danger-text" id="clearCartBtn">Clear cart</button>
+  </aside>
+
+  <div class="overlay" id="overlay"></div>
+
+  <section class="modal" id="loginModal" aria-hidden="true">
+    <div class="modal-card">
+      <button class="close-btn modal-close" data-close-modal="loginModal">×</button>
+      <h2 id="authTitle">Login / Create Account</h2>
+      <p class="muted">Create your demo account or login with mobile OTP. No SMS will be sent.</p>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="createAccountTab" type="button">Create Account</button>
+        <button class="auth-tab" id="loginAccountTab" type="button">Login</button>
+      </div>
+      <div class="account-benefits">
+        <span>✅ Save cart</span><span>📦 Order history</span><span>🪙 Apna Coins</span>
+      </div>
+      <div id="loginStepPhone">
+        <label>Full name</label>
+        <input id="loginName" placeholder="Your name" />
+        <label>Mobile number</label>
+        <input id="loginPhone" maxlength="10" placeholder="10 digit mobile number" />
+        <button class="primary-btn full" id="sendOtpBtn">Generate OTP & Continue</button>
+        <p class="form-note">Your account will be created automatically after OTP verification.</p>
+      </div>
+      <div id="loginStepOtp" class="hidden">
+        <div class="demo-otp">Demo OTP: <strong id="demoOtpText"></strong></div>
+        <label>Enter OTP</label>
+        <input id="otpInput" maxlength="4" placeholder="4 digit OTP" />
+        <button class="primary-btn full" id="verifyOtpBtn">Verify OTP & Open Account</button>
+        <button class="secondary-btn full" id="resendOtpBtn" type="button" style="margin-top:10px">Resend OTP</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="modal" id="productModal" aria-hidden="true">
+    <div class="modal-card product-detail-card" id="productModalContent"></div>
+  </section>
+
+  <section class="modal" id="wishlistModal" aria-hidden="true">
+    <div class="modal-card wide-modal">
+      <button class="close-btn modal-close" data-close-modal="wishlistModal">×</button>
+      <h2>❤️ Wishlist</h2>
+      <div id="wishlistContent" class="modal-list"></div>
+    </div>
+  </section>
+
+  <section class="modal" id="notificationsModal" aria-hidden="true">
+    <div class="modal-card wide-modal">
+      <button class="close-btn modal-close" data-close-modal="notificationsModal">×</button>
+      <h2>🔔 Notifications</h2>
+      <div id="notificationsContent" class="modal-list"></div>
+    </div>
+  </section>
+
+  <section class="modal" id="checkoutModal" aria-hidden="true">
+    <div class="modal-card wide-modal">
+      <button class="close-btn modal-close" data-close-modal="checkoutModal">×</button>
+      <h2>Checkout</h2>
+      <form id="checkoutForm" class="checkout-grid">
+        <div>
+          <label>Customer name</label>
+          <input id="customerName" required placeholder="Full name" />
+        </div>
+        <div>
+          <label>Phone number</label>
+          <input id="customerPhone" required maxlength="10" placeholder="10 digit phone" />
+        </div>
+        <div class="span-2">
+          <label>Full address</label>
+          <textarea id="customerAddress" required placeholder="House no, street, city, pincode"></textarea>
+        </div>
+        <div>
+          <label>Payment method</label>
+          <select id="paymentMethod" required>
+            <option value="">Select payment</option>
+            <option>Cash on Delivery</option>
+            <option>UPI</option>
+            <option>Card</option>
+          </select>
+        </div>
+      </form>
+      <div class="order-preview" id="orderPreview"></div>
+      <button class="primary-btn full" id="placeOrderBtn">Place order</button>
+    </div>
+  </section>
+
+  <section class="modal" id="ordersModal" aria-hidden="true">
+    <div class="modal-card wide-modal">
+      <button class="close-btn modal-close" data-close-modal="ordersModal">×</button>
+      <h2>Order History</h2>
+      <div id="ordersContent" class="modal-list"></div>
+    </div>
+  </section>
+
+  <section class="modal" id="spinModal" aria-hidden="true">
+    <div class="modal-card spin-card">
+      <button class="close-btn modal-close" data-close-modal="spinModal">×</button>
+      <h2>Spin & Win</h2>
+      <div class="wheel-wrap">
+        <div class="wheel-pointer"></div>
+        <div class="wheel" id="wheel"><span>₹10</span><span>₹25</span><span>FREESHIP</span><span>₹50</span><span>₹75</span><span>₹100</span></div>
+      </div>
+      <button class="primary-btn full" id="spinBtn">Spin now</button>
+      <p class="muted">One spin per day, stored locally.</p>
+    </div>
+  </section>
+
+  <section class="modal" id="successModal" aria-hidden="true">
+    <div class="modal-card success-card" id="successContent"></div>
+  </section>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
