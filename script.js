@@ -1,5 +1,5 @@
 const qs=s=>document.querySelector(s),qsa=s=>document.querySelectorAll(s);
-const groceryFallback='https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80';
+const groceryFallback='https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=800&q=80'; 
 const imgErr="this.onerror=null;this.src='"+groceryFallback+"'";
 const CATEGORIES=['All','Fruits','Vegetables','Dairy','Bakery','Snacks','Beverages','Household','Personal Care'];
 const products=[
